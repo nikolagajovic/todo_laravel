@@ -12,7 +12,7 @@ class TodoController extends Controller
 
     public function index()
     {
-        $todos = Auth::user()->todos()->with('category')->latest()->get();
+        $todos = Auth::user()->todos()->with('category')->latest()->paginate(5);
         $categories = Category::all();
         return view('todos.index', compact('todos', 'categories'));
     }
