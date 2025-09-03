@@ -13,11 +13,24 @@ class Todo extends Model
 
     protected $fillable = [
         'task',
-        'completed',
+        'status',
         'user_id',
+        'category_id',
+        'due_date',
+        'duration_minutes',
     ];
 
-    public function user(): BelongsTo {
+    protected $casts = [
+        'due_date' => 'datetime',
+    ];
+
+    public function user(): BelongsTo
+    {
         return $this->belongsTo(User::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 }
