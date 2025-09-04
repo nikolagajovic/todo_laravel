@@ -22,6 +22,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/todos/{todo}', [TodoController::class, 'update'])->name('todos.update');
     Route::delete('/todos/{todo}', [TodoController::class, 'destroy'])->name('todos.destroy');
     Route::patch('/todos/{todo}/fail', [TodoController::class, 'fail'])->name('todos.fail');
+    Route::get('/todos/history', [TodoController::class, 'history'])->name('todos.history');
 });
 
 require __DIR__.'/auth.php';

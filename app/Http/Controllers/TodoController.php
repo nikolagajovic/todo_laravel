@@ -12,7 +12,7 @@ class TodoController extends Controller
 
     public function index()
     {
-        $todos = Auth::user()->todos()->with('category')->latest()->paginate(5);
+        $todos = Auth::user()->todos()->where('status', 'pending')->with('category')->latest()->paginate(5);
         $categories = Category::all();
         return view('todos.index', compact('todos', 'categories'));
     }
@@ -57,5 +57,28 @@ class TodoController extends Controller
         }
         $todo->delete();
         return redirect()->route('todos.index');
+    }
+
+    public function history(Request $request)
+    {
+
+        $query = Auth::user()->todos()
+            ->whereIn('status', ['completed', 'failed'])
+            ->with('category');
+
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('task', 'LIKE', "%{$searchTerm}%")
+                    ->orWhereHas('category', function ($catQuery) use ($searchTerm) {
+                        $catQuery->where('name', 'LIKE', "%{$searchTerm}%");
+                    });
+            });
+        }
+
+        $todos = $query->latest()->paginate(5);
+
+        return view('todos.history', compact('todos'));
     }
 }

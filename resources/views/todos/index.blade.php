@@ -57,6 +57,10 @@
                                             class="ml-2 text-xs text-white bg-blue-500 px-2 py-1 rounded-full align-middle">{{ $todo->category->name }}</span>
                                     @endif
 
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        Kreirano: {{ $todo->created_at->diffForHumans() }}
+                                    </div>
+
                                     <div class="text-sm text-gray-600 mt-1">
                                         @if ($todo->status === 'completed')
                                             <span class="font-bold text-green-700">Urađen</span>
