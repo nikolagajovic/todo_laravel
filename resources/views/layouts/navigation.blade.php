@@ -18,6 +18,11 @@
                     <x-nav-link :href="route('todos.history')" :active="request()->routeIs('todos.history')">
                         {{ __('History') }}
                     </x-nav-link>
+                    @if (Auth::user() && Auth::user()->is_admin)
+                        <x-nav-link :href="route('admin.users.dashboard')" :active="request()->routeIs('admin.*')">
+                            <span class="text-red-500 font-bold">{{ __('Admin Panel') }}</span>
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 

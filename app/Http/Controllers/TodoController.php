@@ -23,8 +23,7 @@ class TodoController extends Controller
         $validated = $request->validate([
             'task' => 'required|string|max:255',
             'category_id' => 'nullable|exists:categories,id',
-            'due_date' => 'nullable|date',
-            'duration_minutes' => 'nullable|integer|min:1',
+            'due_date' => 'nullable|date|after:now',
         ]);
 
         Auth::user()->todos()->create($validated);

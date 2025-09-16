@@ -17,7 +17,6 @@ class Todo extends Model
         'user_id',
         'category_id',
         'due_date',
-        'duration_minutes',
     ];
 
     protected $casts = [

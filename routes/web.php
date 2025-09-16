@@ -9,7 +9,7 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return redirect()->route('todos.index'); 
+    return redirect()->route('todos.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -25,4 +25,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/todos/history', [TodoController::class, 'history'])->name('todos.history');
 });
 
-require __DIR__.'/auth.php';
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/users', [App\Http\Controllers\Admin\DashboardController::class, 'usersDashboard'])->name('users.dashboard');
+    Route::get('/users/{user}', [App\Http\Controllers\Admin\DashboardController::class, 'showUser'])->name('users.show');
+});
+
+require __DIR__ . '/auth.php';

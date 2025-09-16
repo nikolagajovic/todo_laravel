@@ -37,7 +37,12 @@
                                     @endif
 
                                     <div class="text-xs text-gray-500 mt-1">
-                                        Kreirano: {{ $todo->created_at->diffForHumans() }}
+                                        <span>Kreirano: {{ $todo->created_at->format('d.m.Y \u H:i') }}</span>
+                                        <span class="mx-2">|</span>
+                                        <span class="font-semibold">
+                                            {{ $todo->status === 'completed' ? 'Završeno' : 'Neuspešno' }}:
+                                            {{ $todo->updated_at->format('d.m.Y \u H:i') }}
+                                        </span>
                                     </div>
 
                                     <div class="text-sm mt-1">

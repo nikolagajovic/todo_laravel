@@ -15,25 +15,19 @@
                         @csrf
                         <div>
                             <input type="text" name="task" placeholder="Unesite novi zadatak..."
-                                class="w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                required>
+                                class="w-full rounded-md shadow-sm..." required>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Kategorija -->
-                            <select name="category_id"
-                                class="rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <select name="category_id" class="rounded-md shadow-sm...">
                                 <option value="">-- Bez kategorije --</option>
                                 @foreach ($categories as $category)
                                     <option value="{{ $category->id }}">{{ $category->name }}</option>
                                 @endforeach
                             </select>
-                            <!-- Rok (due date) -->
-                            <input type="datetime-local" name="due_date"
-                                class="rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            <!-- Tajmer (u minutima) -->
-                            <input type="number" name="duration_minutes" placeholder="Tajmer (min)"
-                                class="rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                min="1">
+
+                            <input type="datetime-local" name="due_date" class="rounded-md shadow-sm...">
+
                         </div>
                         <x-primary-button>{{ __('Dodaj Zadatak') }}</x-primary-button>
                     </form>
@@ -57,56 +51,51 @@
                                             class="ml-2 text-xs text-white bg-blue-500 px-2 py-1 rounded-full align-middle">{{ $todo->category->name }}</span>
                                     @endif
 
-                                    <div class="text-xs text-gray-500 mt-1">
-                                        Kreirano: {{ $todo->created_at->diffForHumans() }}
-                                    </div>
-
                                     <div class="text-sm text-gray-600 mt-1">
-                                        @if ($todo->status === 'completed')
-                                            <span class="font-bold text-green-700">Urađen</span>
-                                        @elseif($todo->status === 'failed')
-                                            <span class="font-bold text-red-700">Neurađen (vreme isteklo)</span>
-                                        @elseif($todo->status === 'pending' && $todo->duration_minutes)
-                                            <span class="font-bold text-yellow-800 timer"
-                                                data-created-at="{{ $todo->created_at->toIso8601String() }}"
-                                                data-duration-minutes="{{ $todo->duration_minutes }}"
+                                        @if ($todo->status === 'pending' && $todo->due_date)
+                                            <span class="font-bold text-indigo-700 timer"
+                                                data-due-date="{{ $todo->due_date->toIso8601String() }}"
                                                 data-task-id="{{ $todo->id }}">
-                                                Preostalo vreme: Učitavanje...
+                                                Preostalo: Učitavanje...
                                             </span>
                                         @endif
                                     </div>
-                                </div>
-
-                                <div class="flex items-center space-x-2 flex-shrink-0">
-                                    @if ($todo->status === 'pending')
-                                        <form method="POST" action="{{ route('todos.update', $todo) }}"
-                                            class="mark-done-form">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit"
-                                                class="text-sm text-green-600 hover:text-green-900 font-semibold">Urađeno</button>
-                                        </form>
-                                    @endif
-
-                                    <form method="POST" action="{{ route('todos.destroy', $todo) }}"
-                                        onsubmit="return confirm('Jeste li sigurni?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            class="text-sm text-red-600 hover:text-red-900 font-semibold">Obriši</button>
-                                    </form>
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        Kreirano: {{ $todo->created_at->diffForHumans() }}
+                                    </div>
                                 </div>
                             </div>
-                        @empty
-                            <p>Nemate nijedan zadatak. Dodajte jedan!</p>
-                        @endforelse
+
+                            <div class="flex items-center space-x-2 flex-shrink-0">
+                                @if ($todo->status === 'pending')
+                                    <form method="POST" action="{{ route('todos.update', $todo) }}"
+                                        class="mark-done-form">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit"
+                                            class="text-sm text-green-600 hover:text-green-900 font-semibold">Urađeno</button>
+                                    </form>
+                                @endif
+
+                                <form method="POST" action="{{ route('todos.destroy', $todo) }}"
+                                    onsubmit="return confirm('Jeste li sigurni?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                        class="text-sm text-red-600 hover:text-red-900 font-semibold">Obriši</button>
+                                </form>
+                            </div>
                     </div>
-                    <div class="mt-6">
-                        {{ $todos->links() }}
-                    </div>
+                @empty
+                    <p>Nemate nijedan zadatak. Dodajte jedan!</p>
+                    @endforelse
+                </div>
+                <div class="mt-6">
+                    {{ $todos->links() }}
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     @push('scripts')
@@ -141,25 +130,36 @@
                     });
                 };
 
-                timers.forEach(timerEl => {
-                    const createdAt = new Date(timerEl.dataset.createdAt);
-                    const durationMinutes = parseInt(timerEl.dataset.durationMinutes, 10);
-                    const taskId = timerEl.dataset.taskId;
+                const formatRemainingTime = (remainingTime) => {
+                    if (remainingTime <= 0) return "Vreme je isteklo!";
 
-                    const endTime = new Date(createdAt.getTime() + durationMinutes * 60000);
+                    const days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+
+                    let output = "Preostalo: ";
+                    if (days > 0) output += `${days}d `;
+                    if (hours > 0) output += `${hours}h `;
+                    if (minutes > 0) output += `${minutes}m `;
+                    if (days === 0) output += `${seconds}s`; 
+
+                    return output.trim();
+                };
+
+                timers.forEach(timerEl => {
+                    const dueDate = new Date(timerEl.dataset.dueDate);
+                    const taskId = timerEl.dataset.taskId;
 
                     const intervalId = setInterval(() => {
                         const now = new Date();
-                        const remainingTime = endTime - now;
+                        const remainingTime = dueDate - now;
 
                         if (remainingTime <= 0) {
                             clearInterval(intervalId);
                             failTask(taskId, timerEl);
                         } else {
-                            const minutes = Math.floor((remainingTime / 1000) / 60);
-                            const seconds = Math.floor((remainingTime / 1000) % 60);
-                            timerEl.textContent =
-                                `Preostalo vreme: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                            timerEl.textContent = formatRemainingTime(remainingTime);
                         }
                     }, 1000);
                 });
